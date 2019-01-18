@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="connection.url">jdbc:mysql://localhost:3306/issue_tracker_db</property>
+    <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+    <mapping class="com.issuetracker.issuetracker.model.AttachmentEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.IssueEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.LogEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.PriorityEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.ProjectEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.StateEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.TeamEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.TypeEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.UserEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.UserHasTeamEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.VersionEntity"/>
+    <mapping class="com.issuetracker.issuetracker.model.Attachment"/>
+    <mapping class="com.issuetracker.issuetracker.model.Issue"/>
+    <mapping class="com.issuetracker.issuetracker.model.Log"/>
+    <mapping class="com.issuetracker.issuetracker.model.Priority"/>
+    <mapping class="com.issuetracker.issuetracker.model.Project"/>
+    <mapping class="com.issuetracker.issuetracker.model.State"/>
+    <mapping class="com.issuetracker.issuetracker.model.Team"/>
+    <mapping class="com.issuetracker.issuetracker.model.Type"/>
+    <mapping class="com.issuetracker.issuetracker.model.User"/>
+    <mapping class="com.issuetracker.issuetracker.model.UserHasTeam"/>
+    <mapping class="com.issuetracker.issuetracker.model.Version"/>
+    <!-- <property name="connection.username"/> -->
+    <!-- <property name="connection.password"/> -->
+
+    <!-- DB schema will be updated if needed -->
+    <!-- <property name="hbm2ddl.auto">update</property> -->
+  </session-factory>
+</hibernate-configuration>
