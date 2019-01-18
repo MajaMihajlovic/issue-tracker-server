@@ -2,6 +2,7 @@ package com.issuetracker.issuetracker.model;
 
 import javax.persistence.*;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
@@ -26,20 +27,19 @@ import java.util.Objects;
 public class User {
     private int id;
     private String username;
-    private byte[] password;
+    private String password;
     private String email;
     private String fullName;
     private Byte active;
     private Byte deleted;
     private byte[] photo;
     private String token;
-    private Time tokenTime;
+    private Timestamp tokenTime;
     private String isAdmin;
-
     public User() {
     }
 
-    public User(int id, String username, byte[] password, String email, String fullName, Byte active, Byte deleted, byte[] photo, String token, Time tokenTime) {
+    public User(int id, String username,String password, String email, String fullName, Byte active, Byte deleted, byte[] photo, String token, Timestamp token_time) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -49,7 +49,7 @@ public class User {
         this.deleted = deleted;
         this.photo = photo;
         this.token = token;
-        this.tokenTime = tokenTime;
+        setTokenTime(token_time==null ? null:new Timestamp(token_time.getTime()));
     }
 
     @Id
@@ -74,11 +74,11 @@ public class User {
 
     @Basic
     @Column(name = "password")
-    public byte[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(byte[] password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -109,15 +109,15 @@ public class User {
         User user = (User) o;
         return id == user.id &&
                 Objects.equals(username, user.username) &&
-                Arrays.equals(password, user.password) &&
+                Objects.equals(password, user.password) &&
                 Objects.equals(email, user.email) &&
                 Objects.equals(fullName, user.fullName);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, username, email, fullName);
-        result = 31 * result + Arrays.hashCode(password);
+        int result = Objects.hash(id, username, password, email, fullName, active, deleted, token, tokenTime, isAdmin);
+        result = 31 * result + Arrays.hashCode(photo);
         return result;
     }
 
@@ -163,14 +163,13 @@ public class User {
 
     @Basic
     @Column(name = "token_time")
-    public Time getTokenTime() {
+    public Timestamp getTokenTime() {
         return tokenTime;
     }
 
-    public void setTokenTime(Time tokenTime) {
+    public void setTokenTime(Timestamp tokenTime) {
         this.tokenTime = tokenTime;
     }
-
     @Basic
     @Column(name = "is_admin")
     public String getIsAdmin() {

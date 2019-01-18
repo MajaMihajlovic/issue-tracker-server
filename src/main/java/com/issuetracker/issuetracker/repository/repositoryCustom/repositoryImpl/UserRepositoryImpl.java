@@ -1,6 +1,5 @@
 package com.issuetracker.issuetracker.repository.repositoryCustom.repositoryImpl;
 
-import com.issuetracker.issuetracker.util.UserInformation;
 import com.issuetracker.issuetracker.model.User;
 import com.issuetracker.issuetracker.repository.repositoryCustom.UserRepositoryCustom;
 
