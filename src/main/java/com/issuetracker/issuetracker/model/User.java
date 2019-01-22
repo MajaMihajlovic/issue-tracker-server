@@ -1,5 +1,7 @@
 package com.issuetracker.issuetracker.model;
 
+import org.joda.time.DateTime;
+
 import javax.persistence.*;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -12,14 +14,18 @@ import java.util.Objects;
                 targetClass = User.class,
                 columns = {
                         @ColumnResult(name="id"),
-                        @ColumnResult(name="email"),
+
                         @ColumnResult(name="username"),
                         @ColumnResult(name="password"),
+                        @ColumnResult(name="email"),
                         @ColumnResult(name="full_name"),
+
+                        @ColumnResult(name="active",type = Byte.class),
+                        @ColumnResult(name="deleted",type = Byte.class),
                         @ColumnResult(name="photo"),
-                        @ColumnResult(name="active"),
                         @ColumnResult(name="token"),
-                        @ColumnResult(name="token_time", type = Date.class),
+                        @ColumnResult(name="token_time",type = Date.class),
+                        @ColumnResult(name="is_admin",type = Byte.class)
                 }
         )
 )
@@ -35,11 +41,28 @@ public class User {
     private byte[] photo;
     private String token;
     private Timestamp tokenTime;
-    private String isAdmin;
+    private Byte isAdmin;
     public User() {
     }
 
-    public User(int id, String username,String password, String email, String fullName, Byte active, Byte deleted, byte[] photo, String token, Timestamp token_time) {
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", active=" + active +
+                ", deleted=" + deleted +
+                ", photo=" + Arrays.toString(photo) +
+                ", token='" + token + '\'' +
+                ", tokenTime=" + tokenTime +
+                ", isAdmin='" + isAdmin + '\'' +
+                '}';
+    }
+
+    public User(int id, String username, String password, String email, String fullName, Byte active, Byte deleted,byte[] photo, String token, Date token_time,Byte isAdmin) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -49,11 +72,13 @@ public class User {
         this.deleted = deleted;
         this.photo = photo;
         this.token = token;
+        this.isAdmin=isAdmin;
         setTokenTime(token_time==null ? null:new Timestamp(token_time.getTime()));
     }
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -172,11 +197,11 @@ public class User {
     }
     @Basic
     @Column(name = "is_admin")
-    public String getIsAdmin() {
+    public Byte getIsAdmin() {
         return isAdmin;
     }
 
-    public void setIsAdmin(String isAdmin) {
+    public void setIsAdmin(Byte isAdmin) {
         this.isAdmin = isAdmin;
     }
 }

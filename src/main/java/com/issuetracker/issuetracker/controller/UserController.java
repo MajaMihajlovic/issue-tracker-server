@@ -13,11 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.print.attribute.standard.Media;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
@@ -60,11 +62,6 @@ public class UserController extends GenericController<User,Integer> {
     @Value("${badRequest.passwordStrength}")
     private String badRequestPasswordStrength;
 
-    @Value("${badRequest.pinStrength}")
-    private String badRequestPinStrength;
-
-    @Value("${longblob.length}")
-    private Long longblobLength;
 
     @Value("${badRequest.validateEmail}")
     private String badRequestValidateEmail;
@@ -104,16 +101,18 @@ public class UserController extends GenericController<User,Integer> {
 
         return users;
     }
+
+    @CrossOrigin(origins = "http://localhost:8088")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public User login(@RequestBody LoginInfo userInformation) throws ForbiddenException {
+    public @ResponseBody  User login(@RequestBody LoginInfo userInformation) throws ForbiddenException {
+        System.out.println(repository.login(userInformation.getUsername(), userInformation.getPassword()));
         User user = repository.login(userInformation.getUsername(), userInformation.getPassword());
         if (user != null) {
-            userBean.setLoggedIn(true);
-            userBean.setUser(user);
             return user;
         }
         throw new ForbiddenException("Forbidden");
     }
+
     @SuppressWarnings("SameReturnValue")
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public @ResponseBody
@@ -136,11 +135,12 @@ public class UserController extends GenericController<User,Integer> {
                 String randomToken = Util.randomString(16);
                 User newUser = new User();
                 newUser.setEmail(user.getEmail());
-                newUser.setToken(randomToken);
-                newUser.setTokenTime(new Timestamp(new Date().getTime()));
+                newUser.setUsername(user.getUsername());
+                newUser.setFullName(user.getFullName());
+                System.out.println(newUser);
                 if(repo.saveAndFlush(newUser) != null){
-                    entityManager.refresh(newUser);
-                    EmailSender.sendRegistrationLink(user.getEmail().trim(), randomToken);
+                   // entityManager.refresh(newUser);
+                    //EmailSender.sendRegistrationLink(user.getEmail().trim(), randomToken);
 
                     return newUser;
                 }
@@ -154,17 +154,15 @@ public class UserController extends GenericController<User,Integer> {
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public @ResponseBody
     String registration(@RequestBody User newUser) throws BadRequestException {
+        System.out.println("New userrrr:"+newUser);
         User userWithUsername = repository.getByUsername(newUser.getUsername());
         if(userWithUsername == null) {
             if (Validator.stringMaxLength(newUser.getUsername(), 100)) {
                 if(Validator.passwordChecking(newUser.getPassword())){
                     if (Validator.stringMaxLength(newUser.getFullName(), 100)) {
-                                if(Validator.binaryMaxLength(newUser.getPhoto(), longblobLength)){
                                     User user = entityManager.find(User.class, newUser.getId());
                                     user.setUsername(newUser.getUsername());
                                     user.setPassword(Util.hashPassword(newUser.getPassword()));
-                                    user.setToken(null);
-                                    user.setTokenTime(null);
                                     user.setFullName(newUser.getFullName());
                                     user.setPhoto(newUser.getPhoto());
                                     user.setActive((byte) 1);
@@ -175,8 +173,7 @@ public class UserController extends GenericController<User,Integer> {
                                     throw new BadRequestException(badRequestRegistration);
                                 }
                                 throw new BadRequestException(badRequestBinaryLength.replace("{tekst}", "slike"));
-                            }
-                            throw new BadRequestException(badRequestPinStrength);
+
                         }
                         throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "prezimena").replace("{broj}", String.valueOf(100)));
                     }
@@ -273,7 +270,6 @@ public class UserController extends GenericController<User,Integer> {
     String update(@PathVariable Integer id, @RequestBody User user) throws BadRequestException {
         if(userBean.getUser().getId()==id){
             if (Validator.stringMaxLength(user.getFullName(), 100)) {
-                    if(Validator.binaryMaxLength(user.getPhoto(), longblobLength)){
                         User userTemp = repository.findById(id).orElse(null);
                         User oldUser = cloner.deepClone(repo.findById(id).orElse(null));
 
@@ -285,7 +281,6 @@ public class UserController extends GenericController<User,Integer> {
                     throw new BadRequestException(badRequestBinaryLength.replace("{tekst}", "slike"));
                 }
                 throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "prezimena").replace("{broj}", String.valueOf(100)));
-            }
-            throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "imena").replace("{broj}", String.valueOf(100)));
+
     }
 }
