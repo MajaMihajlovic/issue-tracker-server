@@ -12,7 +12,8 @@ public class Validator {
 
     public static Boolean passwordChecking(String password) {
         if (password != null){
-            String regex = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}";
+            System.out.println(password);
+            String regex = "/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(password);
 

@@ -102,12 +102,12 @@ public class UserController extends GenericController<User,Integer> {
         return users;
     }
 
-    @CrossOrigin(origins = "http://localhost:8088")
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public @ResponseBody  User login(@RequestBody LoginInfo userInformation) throws ForbiddenException {
-        System.out.println(repository.login(userInformation.getUsername(), userInformation.getPassword()));
         User user = repository.login(userInformation.getUsername(), userInformation.getPassword());
         if (user != null) {
+            user.setPassword(null);
             return user;
         }
         throw new ForbiddenException("Forbidden");
@@ -156,31 +156,33 @@ public class UserController extends GenericController<User,Integer> {
     String registration(@RequestBody User newUser) throws BadRequestException {
         System.out.println("New userrrr:"+newUser);
         User userWithUsername = repository.getByUsername(newUser.getUsername());
+        System.out.println(userWithUsername);
         if(userWithUsername == null) {
-            if (Validator.stringMaxLength(newUser.getUsername(), 100)) {
-                if(Validator.passwordChecking(newUser.getPassword())){
+             //   if (Validator.passwordChecking(newUser.getPassword())) {
+            if(repository.countAllByEmail(newUser.getEmail()).compareTo(0) == 0){
+                if(Validator.validateEmail(newUser.getEmail())){
                     if (Validator.stringMaxLength(newUser.getFullName(), 100)) {
-                                    User user = entityManager.find(User.class, newUser.getId());
-                                    user.setUsername(newUser.getUsername());
-                                    user.setPassword(Util.hashPassword(newUser.getPassword()));
-                                    user.setFullName(newUser.getFullName());
-                                    user.setPhoto(newUser.getPhoto());
-                                    user.setActive((byte) 1);
-
-                                    if(repo.saveAndFlush(user) != null){
-                                        return "Success";
-                                    }
-                                    throw new BadRequestException(badRequestRegistration);
-                                }
-                                throw new BadRequestException(badRequestBinaryLength.replace("{tekst}", "slike"));
-
+                       // User user = entityManager.find(User.class, newUser.getId());
+                        User user=new User();
+                        user.setUsername(newUser.getUsername());
+                        user.setPassword(Util.hashPassword(newUser.getPassword()));
+                        user.setFullName(newUser.getFullName());
+                        user.setPhoto(newUser.getPhoto());
+                        user.setActive((byte) 1);
+                        user.setEmail(newUser.getEmail());
+                        if (repo.saveAndFlush(user) != null) {
+                            return "Success";
                         }
-                        throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "prezimena").replace("{broj}", String.valueOf(100)));
+                        throw new BadRequestException(badRequestRegistration);
                     }
                     throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "imena").replace("{broj}", String.valueOf(100)));
                 }
-                throw new BadRequestException(badRequestPasswordStrength);
-
+                throw new BadRequestException(badRequestValidateEmail);
+            }
+            throw new BadRequestException(badRequestEmailExists);
+              //  }
+              //  throw new BadRequestException(badRequestPasswordStrength);
+            }throw  new BadRequestException(badRequestUsernameExists);
 
     }
     @RequestMapping(value = "/deactivate/{id}", method = RequestMethod.GET)
@@ -268,19 +270,19 @@ public class UserController extends GenericController<User,Integer> {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public @ResponseBody
     String update(@PathVariable Integer id, @RequestBody User user) throws BadRequestException {
-        if(userBean.getUser().getId()==id){
             if (Validator.stringMaxLength(user.getFullName(), 100)) {
                         User userTemp = repository.findById(id).orElse(null);
-                        User oldUser = cloner.deepClone(repo.findById(id).orElse(null));
-
-                        assert userTemp != null;
                         userTemp.setFullName(user.getFullName());
-                        userTemp.setPhoto(user.getPhoto());
-                        return "Success";
+                        userTemp.setEmail(user.getEmail());
+                User userWithUsername = repository.getByUsername(user.getUsername());
+                if(userWithUsername==null)
+                userTemp.setUsername(user.getUsername());
+                else  throw  new BadRequestException(badRequestUsernameExists);
+                repo.saveAndFlush(userTemp);
+        return "Success";
                     }
                     throw new BadRequestException(badRequestBinaryLength.replace("{tekst}", "slike"));
-                }
-                throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "prezimena").replace("{broj}", String.valueOf(100)));
+
 
     }
 }
