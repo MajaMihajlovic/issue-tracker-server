@@ -1,16 +1,36 @@
 package com.issuetracker.issuetracker.util;
 
 public class PasswordInformation {
+    private Integer id;
     private String oldPassword;
     private String newPassword;
     private String repeatedNewPassword;
 
     public PasswordInformation(){}
 
-    public PasswordInformation(String oldPassword, String newPassword, String repeatedNewPassword) {
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public PasswordInformation(Integer id, String oldPassword, String newPassword, String repeatedNewPassword) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
+        this.id=id;
         this.repeatedNewPassword = repeatedNewPassword;
+    }
+
+    @Override
+    public String toString() {
+        return "PasswordInformation{" +
+                "id=" + id +
+                ", oldPassword='" + oldPassword + '\'' +
+                ", newPassword='" + newPassword + '\'' +
+                ", repeatedNewPassword='" + repeatedNewPassword + '\'' +
+                '}';
     }
 
     public String getOldPassword() {

@@ -11,6 +11,7 @@ public class Project {
     private int id;
     private String name;
     private String description;
+    private byte finnished;
 
     @Id
     @Column(name = "id")
@@ -55,5 +56,15 @@ public class Project {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, description);
+    }
+
+    @Basic
+    @Column(name = "finnished")
+    public byte getFinnished() {
+        return finnished;
+    }
+
+    public void setFinnished(byte finnished) {
+        this.finnished = finnished;
     }
 }

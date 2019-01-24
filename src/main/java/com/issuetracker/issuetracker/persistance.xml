@@ -6,7 +6,7 @@
   <session-factory>
     <property name="connection.url">jdbc:mysql://localhost:3306/issue_tracker_db</property>
     <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-    <mapping class="com.issuetracker.issuetracker.model.AttachmentEntity"/>
+      <mapping class="com.issuetracker.issuetracker.model.AttachmentEntity"/>
       <mapping class="com.issuetracker.issuetracker.model.IssueEntity"/>
       <mapping class="com.issuetracker.issuetracker.model.LogEntity"/>
       <mapping class="com.issuetracker.issuetracker.model.PriorityEntity"/>

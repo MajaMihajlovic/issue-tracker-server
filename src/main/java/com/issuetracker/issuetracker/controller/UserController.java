@@ -218,20 +218,18 @@ public class UserController extends GenericController<User,Integer> {
     @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
     public @ResponseBody
     String updatePassword(@RequestBody PasswordInformation passwordInformation) throws BadRequestException{
-        User user = repository.findById(userBean.getUser().getId()).orElse(null);
+        User user = repository.findById(passwordInformation.getId()).orElse(null);
+        System.out.println(passwordInformation);
         if(user != null){
-            if(passwordInformation.getOldPassword() != null && user.getPassword().trim().equals(Util.hashPassword(passwordInformation.getOldPassword().trim()))){
-                if(passwordInformation.getNewPassword() != null && Validator.passwordChecking(passwordInformation.getNewPassword())){
-                    if(passwordInformation.getRepeatedNewPassword() != null && passwordInformation.getNewPassword().trim().equals(passwordInformation.getRepeatedNewPassword().trim())){
-                        user.setPassword(Util.hashPassword(passwordInformation.getNewPassword()));
-                        if(repo.saveAndFlush(user) != null){
-                            return "Success";
-                        }
-                        throw new BadRequestException(badRequestUpdate);
+            if(passwordInformation.getOldPassword() != null && user.getPassword().trim().equals(Util.hashPassword(passwordInformation.getOldPassword().trim()))) {
+                if (passwordInformation.getRepeatedNewPassword() != null && passwordInformation.getNewPassword().trim().equals(passwordInformation.getRepeatedNewPassword().trim())) {
+                    user.setPassword(Util.hashPassword(passwordInformation.getNewPassword()));
+                    if (repo.saveAndFlush(user) != null) {
+                        return "Success";
                     }
-                    throw new BadRequestException(badRequestRepeatedNewPassword);
+                    throw new BadRequestException(badRequestUpdate);
                 }
-                throw new BadRequestException(badRequestPasswordStrength);
+                throw new BadRequestException(badRequestRepeatedNewPassword);
             }
             throw new BadRequestException(badRequestOldPassword);
         }
