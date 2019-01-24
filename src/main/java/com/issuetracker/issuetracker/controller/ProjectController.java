@@ -53,6 +53,7 @@ public class ProjectController extends GenericController<Project,Integer>{
         newProject.setDescription(project.getDescription());
         newProject.setFinnished((byte)0);
         newProject.setName(project.getName());
+        newProject.setPhotoUrl(project.getPhotoUrl());
         if(repo.saveAndFlush(newProject)!=null) {
             entityManager.refresh(newProject);
             return newProject;
@@ -86,6 +87,7 @@ public class ProjectController extends GenericController<Project,Integer>{
             projectTemp.setName(project.getName());
             projectTemp.setDescription(project.getDescription());
             projectTemp.setFinnished(project.getFinnished());
+            projectTemp.setPhotoUrl(project.getPhotoUrl());
             repo.saveAndFlush(projectTemp);
             return "Success";
         }throw new BadRequestException(badRequestUpdate);

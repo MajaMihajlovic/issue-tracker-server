@@ -1,5 +1,6 @@
 package com.issuetracker.issuetracker.controller;
 
+import com.google.common.io.ByteStreams;
 import com.issuetracker.issuetracker.common.exception.BadRequestException;
 import com.issuetracker.issuetracker.common.exception.ForbiddenException;
 import com.issuetracker.issuetracker.model.LoginInfo;
@@ -23,6 +24,10 @@ import javax.print.attribute.standard.Media;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -124,25 +129,32 @@ public class UserController extends GenericController<User,Integer> {
 
         return "Success";
     }
-    @Override
-    @RequestMapping(method = RequestMethod.POST)
-    @Transactional
-    @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody
-    User insert(@RequestBody User user) throws BadRequestException {
+
+    @RequestMapping(value="insert", method = RequestMethod.POST)
+    public @ResponseBody String insert(String email,InputStream file, String password, String username, String fullname) throws BadRequestException {
+        User user=new User();
+        user.setUsername(username);
+        user.setFullName(fullname);
+        user.setPassword(Util.hashPassword(password));
+        user.setEmail(email);
+        try {
+            byte[] array = ByteStreams.toByteArray(file);
+            user.setPhoto(array);
+            System.out.println(array.length);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new BadRequestException(badRequestInsert);
+        }
+
+        user.setActive((byte)1);
+        System.out.println("Insert"+user);
         if(repository.countAllByEmail(user.getEmail()).compareTo(0) == 0){
             if(Validator.validateEmail(user.getEmail())){
                 String randomToken = Util.randomString(16);
-                User newUser = new User();
-                newUser.setEmail(user.getEmail());
-                newUser.setUsername(user.getUsername());
-                newUser.setFullName(user.getFullName());
-                System.out.println(newUser);
-                if(repo.saveAndFlush(newUser) != null){
-                   // entityManager.refresh(newUser);
-                    //EmailSender.sendRegistrationLink(user.getEmail().trim(), randomToken);
 
-                    return newUser;
+                if(repo.saveAndFlush(user) != null){
+                    //EmailSender.sendRegistrationLink(user.getEmail().trim(), randomToken);
+                    return "Success";
                 }
                 throw new BadRequestException(badRequestInsert);
             }
@@ -167,7 +179,7 @@ public class UserController extends GenericController<User,Integer> {
                         user.setUsername(newUser.getUsername());
                         user.setPassword(Util.hashPassword(newUser.getPassword()));
                         user.setFullName(newUser.getFullName());
-                        user.setPhoto(newUser.getPhoto());
+                       // user.setPhoto(newUser.getPhoto());
                         user.setActive((byte) 1);
                         user.setEmail(newUser.getEmail());
                         if (repo.saveAndFlush(user) != null) {

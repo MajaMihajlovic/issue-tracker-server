@@ -12,6 +12,7 @@ public class Project {
     private String name;
     private String description;
     private byte finnished;
+    private String photoUrl;
 
     @Id
     @Column(name = "id")
@@ -66,5 +67,15 @@ public class Project {
 
     public void setFinnished(byte finnished) {
         this.finnished = finnished;
+    }
+
+    @Basic
+    @Column(name = "photoUrl")
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }
