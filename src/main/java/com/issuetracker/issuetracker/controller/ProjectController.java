@@ -17,6 +17,7 @@ package com.issuetracker.issuetracker.controller;
         import javax.persistence.PersistenceContext;
         import javax.transaction.Transactional;
         import java.util.List;
+        import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("api/project")
@@ -42,12 +43,10 @@ public class ProjectController extends GenericController<Project,Integer>{
         super(repo);
         repository = repo;
     }
-    @Override
-    @RequestMapping(method = RequestMethod.POST)
+
+    @RequestMapping(value="/insert",method = RequestMethod.POST)
     @Transactional
-    @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody
-    Project insert(@RequestBody Project project) throws BadRequestException {
+    public @ResponseBody String insertProject(@RequestBody Project project) throws BadRequestException {
 
         Project newProject=new Project();
         newProject.setDescription(project.getDescription());
@@ -55,8 +54,7 @@ public class ProjectController extends GenericController<Project,Integer>{
         newProject.setName(project.getName());
         newProject.setPhotoUrl(project.getPhotoUrl());
         if(repo.saveAndFlush(newProject)!=null) {
-            entityManager.refresh(newProject);
-            return newProject;
+            return "Success";
         }else throw new BadRequestException(badRequestInsert);
     }
 
@@ -76,6 +74,13 @@ public class ProjectController extends GenericController<Project,Integer>{
             throw new BadRequestException(badRequestNoProject);
         }
     }
+
+    public @ResponseBody
+    @RequestMapping(value="/getNames", method = RequestMethod.GET)
+    List<String> getAllNames() {
+        return cloner.deepClone(repository.getAllByFinnishedEquals((byte)0)).stream().map(Project::getName).collect(Collectors.toList());
+    }
+
 
     @Override
     @Transactional

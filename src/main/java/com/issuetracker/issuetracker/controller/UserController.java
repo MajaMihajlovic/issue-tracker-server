@@ -10,6 +10,8 @@ import com.issuetracker.issuetracker.util.EmailSender;
 import com.issuetracker.issuetracker.util.PasswordInformation;
 import com.issuetracker.issuetracker.util.Util;
 import com.issuetracker.issuetracker.util.Validator;
+import org.apache.catalina.connector.CoyoteInputStream;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -28,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -130,21 +133,15 @@ public class UserController extends GenericController<User,Integer> {
         return "Success";
     }
 
-    @RequestMapping(value="insert", method = RequestMethod.POST)
-    public @ResponseBody String insert(String email,InputStream file, String password, String username, String fullname) throws BadRequestException {
+    @RequestMapping(value="/insert", method = RequestMethod.POST)
+    public @ResponseBody String insert(String email, InputStream file, String password, String username, String fullname) throws BadRequestException, IOException {
         User user=new User();
         user.setUsername(username);
         user.setFullName(fullname);
         user.setPassword(Util.hashPassword(password));
         user.setEmail(email);
-        try {
-            byte[] array = ByteStreams.toByteArray(file);
-            user.setPhoto(array);
-            System.out.println(array.length);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new BadRequestException(badRequestInsert);
-        }
+
+        user.setPhoto(file.readAllBytes());
 
         user.setActive((byte)1);
         System.out.println("Insert"+user);
@@ -284,10 +281,7 @@ public class UserController extends GenericController<User,Integer> {
                         User userTemp = repository.findById(id).orElse(null);
                         userTemp.setFullName(user.getFullName());
                         userTemp.setEmail(user.getEmail());
-                User userWithUsername = repository.getByUsername(user.getUsername());
-                if(userWithUsername==null)
-                userTemp.setUsername(user.getUsername());
-                else  throw  new BadRequestException(badRequestUsernameExists);
+                        userTemp.setUsername(user.getUsername());
                 repo.saveAndFlush(userTemp);
         return "Success";
                     }
