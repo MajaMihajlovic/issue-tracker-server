@@ -75,11 +75,7 @@ public class ProjectController extends GenericController<Project,Integer>{
         }
     }
 
-    public @ResponseBody
-    @RequestMapping(value="/getNames", method = RequestMethod.GET)
-    List<String> getAllNames() {
-        return cloner.deepClone(repository.getAllByFinnishedEquals((byte)0)).stream().map(Project::getName).collect(Collectors.toList());
-    }
+
 
 
     @Override

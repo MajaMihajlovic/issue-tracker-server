@@ -1,9 +1,6 @@
 package com.issuetracker.issuetracker.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
@@ -16,14 +13,15 @@ public class Issue {
     private int priorityId;
     private Timestamp duedate;
     private Timestamp createdDate;
-    private int userRoleId;
     private int typeId;
     private int reporterId;
     private int assigneeId;
     private int versionId;
+    private int projectId;
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -93,16 +91,6 @@ public class Issue {
     }
 
     @Basic
-    @Column(name = "user_role_id")
-    public int getUserRoleId() {
-        return userRoleId;
-    }
-
-    public void setUserRoleId(int userRoleId) {
-        this.userRoleId = userRoleId;
-    }
-
-    @Basic
     @Column(name = "type_id")
     public int getTypeId() {
         return typeId;
@@ -150,7 +138,6 @@ public class Issue {
         return id == issue.id &&
                 stateId == issue.stateId &&
                 priorityId == issue.priorityId &&
-                userRoleId == issue.userRoleId &&
                 typeId == issue.typeId &&
                 reporterId == issue.reporterId &&
                 assigneeId == issue.assigneeId &&
@@ -163,6 +150,16 @@ public class Issue {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, stateId, priorityId, duedate, createdDate, userRoleId, typeId, reporterId, assigneeId, versionId);
+        return Objects.hash(id, title, description, stateId, priorityId, duedate, createdDate, typeId, reporterId, assigneeId, versionId);
+    }
+
+    @Basic
+    @Column(name = "project_id")
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
     }
 }
