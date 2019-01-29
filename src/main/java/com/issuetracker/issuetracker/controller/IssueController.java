@@ -1,22 +1,18 @@
 package com.issuetracker.issuetracker.controller;
 
-import com.issuetracker.issuetracker.common.exception.BadRequestException;
 import com.issuetracker.issuetracker.model.Issue;
-import com.issuetracker.issuetracker.model.Project;
+import com.issuetracker.issuetracker.model.modelCustom.IssueCustom;
 import com.issuetracker.issuetracker.repository.IssueRepository;
-import com.issuetracker.issuetracker.repository.UserRepository;
-import microsoft.exchange.webservices.data.core.request.GetEventsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("api/issue")
@@ -33,6 +29,23 @@ public class IssueController extends GenericController<Issue,Integer> {
     public IssueController(IssueRepository repo) {
         super(repo);
         repository = repo;
+    }
+
+
+    @RequestMapping(value="/getAll/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    List<IssueCustom> getAllIssuesByUser(@PathVariable Integer id) {
+       List<IssueCustom> lista=repository.getAllIssues().stream().filter(en->en.getAssigneId()==id).collect(Collectors.toList());
+            return lista;
+    }
+
+    @RequestMapping(value="/getAllByProject/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    List<IssueCustom> getAllIssuesByProject(@PathVariable Integer id) {
+        List<IssueCustom> lista=repository.getAllIssues().stream().filter(en->en.getProjectId()==id).collect(Collectors.toList());
+        return lista;
     }
 
     @RequestMapping(value="/insert",method = RequestMethod.POST)

@@ -29,6 +29,7 @@ import java.util.Objects;
                 }
         )
 )
+@Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 public class User {
     private int id;

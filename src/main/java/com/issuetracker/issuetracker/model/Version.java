@@ -1,11 +1,9 @@
 package com.issuetracker.issuetracker.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
+@Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 public class Version {
     private int id;

@@ -3,7 +3,7 @@ package com.issuetracker.issuetracker.model;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
-
+@Inheritance(strategy = InheritanceType.JOINED)
 @Entity
 public class Issue {
     private int id;

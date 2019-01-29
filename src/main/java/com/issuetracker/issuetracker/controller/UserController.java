@@ -5,6 +5,7 @@ import com.issuetracker.issuetracker.common.exception.BadRequestException;
 import com.issuetracker.issuetracker.common.exception.ForbiddenException;
 import com.issuetracker.issuetracker.model.LoginInfo;
 import com.issuetracker.issuetracker.model.User;
+import com.issuetracker.issuetracker.model.modelCustom.UserCustom;
 import com.issuetracker.issuetracker.repository.UserRepository;
 import com.issuetracker.issuetracker.util.EmailSender;
 import com.issuetracker.issuetracker.util.PasswordInformation;
@@ -109,6 +110,15 @@ public class UserController extends GenericController<User,Integer> {
 
         return users;
     }
+
+    @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
+    public @ResponseBody
+    List<UserCustom> getUserFullName() {
+        List<UserCustom> users = repository.getAllFiltered();
+        System.out.println(users);
+        return users;
+    }
+
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
