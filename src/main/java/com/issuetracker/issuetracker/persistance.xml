@@ -6,7 +6,7 @@
   <session-factory>
     <property name="connection.url">jdbc:mysql://localhost:3306/issue_tracker_db</property>
     <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-    <mapping class="com.issuetracker.issuetracker.model.Attachment"/>
+      <mapping class="com.issuetracker.issuetracker.model.Attachment"/>
     <mapping class="com.issuetracker.issuetracker.model.Issue"/>
     <mapping class="com.issuetracker.issuetracker.model.Log"/>
     <mapping class="com.issuetracker.issuetracker.model.Priority"/>
@@ -17,7 +17,8 @@
 
 
     <mapping class="com.issuetracker.issuetracker.model.Version"/>
-    <!-- <property name="connection.username"/> -->
+      <mapping class="com.issuetracker.issuetracker.model.ProjectHasUser"/>
+      <!-- <property name="connection.username"/> -->
     <!-- <property name="connection.password"/> -->
 
     <!-- DB schema will be updated if needed -->

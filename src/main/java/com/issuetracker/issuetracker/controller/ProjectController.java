@@ -1,10 +1,12 @@
 package com.issuetracker.issuetracker.controller;
 
         import com.issuetracker.issuetracker.common.exception.BadRequestException;
-        import com.issuetracker.issuetracker.model.Project;
-        import com.issuetracker.issuetracker.model.User;
+        import com.issuetracker.issuetracker.model.*;
+        import com.issuetracker.issuetracker.model.modelCustom.ProjectCustom;
+        import com.issuetracker.issuetracker.repository.ProjectHasUserRepository;
         import com.issuetracker.issuetracker.repository.ProjectRepository;
         import com.issuetracker.issuetracker.repository.UserRepository;
+        import com.issuetracker.issuetracker.util.EmailSender;
         import com.issuetracker.issuetracker.util.Validator;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ package com.issuetracker.issuetracker.controller;
 public class ProjectController extends GenericController<Project,Integer>{
 
     private ProjectRepository repository;
+    private ProjectHasUserRepository projectHasUserRepo;
 
     @Value("${badRequest.insert}")
     private String badRequestInsert;
@@ -39,21 +42,29 @@ public class ProjectController extends GenericController<Project,Integer>{
     private EntityManager entityManager;
 
     @Autowired
-    public ProjectController(ProjectRepository repo) {
+    public ProjectController(ProjectRepository repo, ProjectHasUserRepository projectHasUserRepo) {
         super(repo);
         repository = repo;
+        this.projectHasUserRepo=projectHasUserRepo;
     }
 
     @RequestMapping(value="/insert",method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody String insertProject(@RequestBody Project project) throws BadRequestException {
-
+    public @ResponseBody String insertProject(@RequestBody ProjectCustom project) throws BadRequestException {
         Project newProject=new Project();
-        newProject.setDescription(project.getDescription());
+        newProject.setDescription(project.getProject().getDescription());
         newProject.setFinnished((byte)0);
-        newProject.setName(project.getName());
-        newProject.setPhotoUrl(project.getPhotoUrl());
-        if(repo.saveAndFlush(newProject)!=null) {
+        newProject.setName(project.getProject().getName());
+        newProject.setPhotoUrl(project.getProject().getPhotoUrl());
+        Project pro=null;
+        if(( pro=repo.saveAndFlush(newProject))!=null) {
+            for(ParticipantInfo info:project.getList()){
+                ProjectHasUser entity=new ProjectHasUser();
+                entity.setProjectId(pro.getId());
+                entity.setUserId(info.getId());
+                projectHasUserRepo.saveAndFlush(entity);
+                EmailSender.sendNotification(info.getText(),pro.getName());
+            }
             return "Success";
         }else throw new BadRequestException(badRequestInsert);
     }
@@ -63,6 +74,8 @@ public class ProjectController extends GenericController<Project,Integer>{
     List<Project> getAll() {
         return cloner.deepClone(repository.getAllByFinnishedEquals((byte)0));
     }
+
+
     @Override
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public @ResponseBody
@@ -76,6 +89,16 @@ public class ProjectController extends GenericController<Project,Integer>{
     }
 
 
+    @RequestMapping(value = "/getByName/{name}", method = RequestMethod.GET)
+    public @ResponseBody
+    List<Project> getAllByName(@PathVariable("name") String name) throws BadRequestException {
+        List<Project> projects = repository.getAllByNameContaining(name).stream().filter(en->en.getFinnished()==(byte)0).collect(Collectors.toList());
+        if (projects != null ) {
+            return projects;
+        } else {
+            throw new BadRequestException(badRequestNoProject);
+        }
+    }
 
 
     @Override
@@ -94,4 +117,13 @@ public class ProjectController extends GenericController<Project,Integer>{
         }throw new BadRequestException(badRequestUpdate);
     }
 
+    @Transactional
+    @RequestMapping(value = "/finish/{id}", method = RequestMethod.GET)
+    public @ResponseBody
+    String update(@PathVariable Integer id){
+            Project projectTemp = repository.findById(id).orElse(null);
+            projectTemp.setFinnished((byte)1);
+            repo.saveAndFlush(projectTemp);
+            return "Success";
+    }
 }

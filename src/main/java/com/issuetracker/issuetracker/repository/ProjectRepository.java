@@ -8,4 +8,5 @@ import java.util.List;
 public interface ProjectRepository  extends JpaRepository<Project, Integer>  {
 
     List<Project> getAllByFinnishedEquals(byte value);
+    List<Project> getAllByNameContaining(String name);
 }

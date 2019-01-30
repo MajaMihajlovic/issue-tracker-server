@@ -43,7 +43,22 @@ public class User {
     private String token;
     private Timestamp tokenTime;
     private Byte isAdmin;
+
     public User() {
+    }
+
+    public User(int id, String username, String password, String email, String fullName, Byte active, Byte deleted,byte[] photo, String token, Date token_time,Byte isAdmin) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.fullName = fullName;
+        this.active = active;
+        this.deleted = deleted;
+        this.photo = photo;
+        this.token = token;
+        this.isAdmin=isAdmin;
+        setTokenTime(token_time==null ? null:new Timestamp(token_time.getTime()));
     }
 
     @Override
@@ -61,20 +76,6 @@ public class User {
                 ", tokenTime=" + tokenTime +
                 ", isAdmin='" + isAdmin + '\'' +
                 '}';
-    }
-
-    public User(int id, String username, String password, String email, String fullName, Byte active, Byte deleted,byte[] photo, String token, Date token_time,Byte isAdmin) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.fullName = fullName;
-        this.active = active;
-        this.deleted = deleted;
-        this.photo = photo;
-        this.token = token;
-        this.isAdmin=isAdmin;
-        setTokenTime(token_time==null ? null:new Timestamp(token_time.getTime()));
     }
 
     @Id
@@ -193,14 +194,19 @@ public class User {
         return tokenTime;
     }
 
+
+
     public void setTokenTime(Timestamp tokenTime) {
         this.tokenTime = tokenTime;
     }
+
     @Basic
     @Column(name = "is_admin")
     public Byte getIsAdmin() {
         return isAdmin;
     }
+
+
 
     public void setIsAdmin(Byte isAdmin) {
         this.isAdmin = isAdmin;

@@ -119,6 +119,13 @@ public class UserController extends GenericController<User,Integer> {
         return users;
     }
 
+    @RequestMapping(value = "/getParticipants/{id}", method = RequestMethod.GET)
+    public @ResponseBody
+    List<UserCustom> getUserFullName(@PathVariable Integer id) {
+        List<UserCustom> users = repository.getParticipants(id);
+        return users;
+    }
+
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

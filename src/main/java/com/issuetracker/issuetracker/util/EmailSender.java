@@ -32,23 +32,26 @@ public class EmailSender {
         return properties;
     }
 
-    @Async
-    public void notify(String recipientMail, String messageText) throws BadRequestException {
-        Properties properties = getTLSSetProperty();
+    public static void sendNotification(String text, String projectName) {
+        String mail=text.split(" ")[2].replace("[","").replace("]","");
+        System.out.println(mail);
+        try {
+            notify(mail,"You are added as participant in project "+projectName+"");
+        } catch (BadRequestException e) {
+            e.printStackTrace();
+        }
+    }
 
+    @Async
+    public static void notify(String recipientMail, String messageText) throws BadRequestException {
+        Properties properties = getTLSSetProperty();
         Session session = Session.getDefaultInstance(properties, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(SENDER_MAIL, PASSWORD);
             }
         });
-
         try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SENDER_MAIL, "Issue Tracker"));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientMail));
-            message.setSubject("Notification");
-            message.setText(messageText);
-
+            Message message = getMimeMessage(session,recipientMail,"Notification",messageText);
             Transport.send(message);
 
         } catch (MessagingException | UnsupportedEncodingException e) {
@@ -56,35 +59,6 @@ public class EmailSender {
         }
     }
 
-    @Async
-    public void notifyAll(List<String> recipientMail, String messageText) throws BadRequestException {
-        Properties properties = getTLSSetProperty();
-
-
-        Session session = Session.getDefaultInstance(properties, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(SENDER_MAIL, PASSWORD);
-            }
-        });
-
-        try {
-            InternetAddress[] recipientAddresses=new InternetAddress[recipientMail.size()];
-            int counter=0;
-            for(String mail:recipientMail){
-                recipientAddresses[counter++]=new InternetAddress(mail);
-            }
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SENDER_MAIL, "Issue Tracker"));
-            message.setRecipients(Message.RecipientType.TO, recipientAddresses);
-            message.setSubject("Notification");
-            message.setText(messageText);
-
-            Transport.send(message);
-
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new BadRequestException("Recipient mail not found.");
-        }
-    }
 
     public static void sendRegistrationLink(String recipientMail, String registrationToken) throws BadRequestException {
         Properties properties = getTLSSetProperty();
@@ -96,7 +70,7 @@ public class EmailSender {
         });
 
         try {
-            Message message = new MimeMessage(session);
+            Message message = getMimeMessage(session,recipientMail,"Registration","You can register on this link http://localhost:8020 by clicking on button Register. Your token is \" + registrationToken + \".\"");
             message.setFrom(new InternetAddress(SENDER_MAIL, "Issue Tracker"));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientMail));
             message.setSubject("Registration");
@@ -119,16 +93,21 @@ public class EmailSender {
         });
 
         try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SENDER_MAIL, "Issue Tracker"));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientMail));
-            message.setSubject("Registration");
-            message.setText("Your new password is " + newPassword + ". Please change it immediately after login.");
-
+            Message message=getMimeMessage(session,recipientMail,"Registration",
+                    "Your new password is " + newPassword + ". Please change it immediately after login.");
             Transport.send(message);
 
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new BadRequestException("Recipient mail not found.");
         }
+    }
+
+    private static Message getMimeMessage(Session session,String recipientMail, String subject,String text) throws UnsupportedEncodingException, MessagingException {
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(SENDER_MAIL, "Issue Tracker"));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientMail));
+        message.setSubject(subject);
+        message.setText(text);
+        return message;
     }
 }

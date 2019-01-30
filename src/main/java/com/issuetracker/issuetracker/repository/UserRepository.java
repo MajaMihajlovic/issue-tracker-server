@@ -12,4 +12,5 @@ public interface UserRepository  extends JpaRepository<User, Integer>, UserRepos
     User getByToken(String token);
     Integer countAllByEmail(String email);
     List<User> getAllByActive(byte active);
+    User getUserById(Integer id);
 }

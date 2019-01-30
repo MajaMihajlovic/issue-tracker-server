@@ -1,9 +1,13 @@
 package com.issuetracker.issuetracker.controller;
 
+import com.issuetracker.issuetracker.common.exception.BadRequestException;
 import com.issuetracker.issuetracker.model.Issue;
 import com.issuetracker.issuetracker.model.modelCustom.IssueCustom;
 import com.issuetracker.issuetracker.repository.IssueRepository;
+import com.issuetracker.issuetracker.repository.UserRepository;
+import com.issuetracker.issuetracker.util.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +27,16 @@ public class IssueController extends GenericController<Issue,Integer> {
     @PersistenceContext
     private EntityManager entityManager;
 
+    UserRepository userRepository;
     IssueRepository repository;
 
+    @Value("${badRequest.insert}")
+    private String badRequestInsert;
     @Autowired
-    public IssueController(IssueRepository repo) {
+    public IssueController(IssueRepository repo, UserRepository userRepository) {
         super(repo);
         repository = repo;
+        this.userRepository=userRepository;
     }
 
 
@@ -51,9 +59,14 @@ public class IssueController extends GenericController<Issue,Integer> {
     @RequestMapping(value="/insert",method = RequestMethod.POST)
     @Transactional
     public @ResponseBody
-    String insertProject(@RequestBody Issue issue) {
-    System.out.println(issue);
-    return "";
+    String insertProject(@RequestBody Issue issue) throws BadRequestException {
+    if(repo.saveAndFlush(issue)!=null){
+        EmailSender.notify(userRepository.getUserById(issue.getAssigneeId()).getEmail(), "You have new task.\n"+issue.getTitle()+"\n"+issue.getDescription());
+        return "Success";
+    }else throw new BadRequestException(badRequestInsert);
+
     }
+
+
 
 }

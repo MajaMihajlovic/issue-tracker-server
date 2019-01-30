@@ -13,6 +13,7 @@ public class Project {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -67,7 +68,7 @@ public class Project {
     }
 
     @Basic
-    @Column(name = "photoUrl")
+    @Column(name = "photo_url")
     public String getPhotoUrl() {
         return photoUrl;
     }

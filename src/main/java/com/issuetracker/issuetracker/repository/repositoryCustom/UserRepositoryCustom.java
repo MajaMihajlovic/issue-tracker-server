@@ -10,4 +10,6 @@ public interface UserRepositoryCustom {
         User login(String username, String password);
 
         List<UserCustom> getAllFiltered();
+
+        List<UserCustom> getParticipants(Integer id);
 }
