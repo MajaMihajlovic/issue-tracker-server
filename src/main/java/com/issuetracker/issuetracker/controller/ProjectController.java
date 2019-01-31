@@ -1,6 +1,7 @@
 package com.issuetracker.issuetracker.controller;
 
         import com.issuetracker.issuetracker.common.exception.BadRequestException;
+        import com.issuetracker.issuetracker.common.exception.ForbiddenException;
         import com.issuetracker.issuetracker.model.*;
         import com.issuetracker.issuetracker.model.modelCustom.ProjectCustom;
         import com.issuetracker.issuetracker.repository.ProjectHasUserRepository;
@@ -38,6 +39,8 @@ public class ProjectController extends GenericController<Project,Integer>{
     @Value("${badRequest.noProject}")
     private String badRequestNoProject;
 
+    @Value("${badRequest.delete}")
+    private String badRequestDelete;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -115,6 +118,22 @@ public class ProjectController extends GenericController<Project,Integer>{
             repo.saveAndFlush(projectTemp);
             return "Success";
         }throw new BadRequestException(badRequestUpdate);
+    }
+
+    @Override
+    @RequestMapping(value = {"/{id}"}, method = RequestMethod.DELETE)
+    public @ResponseBody
+    String delete(@PathVariable Integer id) throws BadRequestException, ForbiddenException {
+        try {
+            Project project = repo.findById(id).orElse(null);
+            List<ProjectHasUser> usrs=projectHasUserRepo.findAllByProjectId(id);
+            projectHasUserRepo.deleteAll(usrs);
+            repo.deleteById(id);
+            return "Success";
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new BadRequestException(badRequestDelete);
+        }
     }
 
     @Transactional

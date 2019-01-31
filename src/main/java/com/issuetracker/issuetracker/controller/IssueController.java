@@ -3,6 +3,7 @@ package com.issuetracker.issuetracker.controller;
 import com.issuetracker.issuetracker.common.exception.BadRequestException;
 import com.issuetracker.issuetracker.model.Issue;
 import com.issuetracker.issuetracker.model.modelCustom.IssueCustom;
+import com.issuetracker.issuetracker.model.modelCustom.IssueType;
 import com.issuetracker.issuetracker.repository.IssueRepository;
 import com.issuetracker.issuetracker.repository.UserRepository;
 import com.issuetracker.issuetracker.util.EmailSender;
@@ -56,6 +57,14 @@ public class IssueController extends GenericController<Issue,Integer> {
         return lista;
     }
 
+    @RequestMapping(value="/byType/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    List<IssueType> getIssueTypeByProject(@PathVariable Integer id) {
+        List<IssueType> lista=repository.countIssueType(id);
+        return lista;
+    }
+
     @RequestMapping(value="/insert",method = RequestMethod.POST)
     @Transactional
     public @ResponseBody
@@ -66,6 +75,8 @@ public class IssueController extends GenericController<Issue,Integer> {
     }else throw new BadRequestException(badRequestInsert);
 
     }
+
+
 
 
 
