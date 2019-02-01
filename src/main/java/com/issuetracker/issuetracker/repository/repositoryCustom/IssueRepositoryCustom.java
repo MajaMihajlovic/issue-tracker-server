@@ -9,4 +9,6 @@ public interface IssueRepositoryCustom {
 
     List<IssueCustom> getAllIssues();
     List<IssueType> countIssueType(Integer projectId);
+    List<IssueType> countIssuePriority(Integer projectId);
+    List<IssueType> countIssueState(Integer projectId);
 }

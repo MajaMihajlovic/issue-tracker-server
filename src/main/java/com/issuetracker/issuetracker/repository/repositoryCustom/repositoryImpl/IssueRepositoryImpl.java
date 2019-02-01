@@ -20,7 +20,10 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom{
             " left join user as a on a.id=assignee_id\n" +
             " left join version as v on v.id=version_id;";
 
-    private static final String COUNT_ISSUES="select name as type,count(name) as count from issue i inner join type t on t.id=i.type_id  where project_id=?  group by name;";
+    private static final String COUNT_ISSUES_BY_TYPE="select name as type,count(name) as count from issue i inner join type t on t.id=i.type_id  where project_id=?  group by name;";
+    private static final String COUNT_ISSUES_BY_PRIORITY="select name as type,count(name) as count from issue i inner join priority t on t.id=i.priority_id  where project_id=?  group by name;";
+    private static final String COUNT_ISSUES_BY_STATE="select name as type,count(name) as count from issue i inner join state t on t.id=i.state_id  where project_id=?  group by name;";
+
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -41,13 +44,15 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom{
 
     @Override
     public List<IssueType> countIssueType(Integer projectId) {
-        List<IssueType> list = entityManager.createNativeQuery(COUNT_ISSUES,"IssueType").setParameter(1,projectId).getResultList();
-        if(list == null || list.isEmpty()){
-            return null;
-        }
-        else{
-            return list;
-        }
+        return entityManager.createNativeQuery(COUNT_ISSUES_BY_TYPE,"IssueType").setParameter(1,projectId).getResultList();
+    }
+    @Override
+    public List<IssueType> countIssuePriority(Integer projectId) {
+       return  entityManager.createNativeQuery(COUNT_ISSUES_BY_PRIORITY,"IssueType").setParameter(1,projectId).getResultList();
+    }
+    @Override
+    public List<IssueType> countIssueState(Integer projectId) {
+       return  entityManager.createNativeQuery(COUNT_ISSUES_BY_STATE,"IssueType").setParameter(1,projectId).getResultList();
     }
     }
 

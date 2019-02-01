@@ -65,6 +65,22 @@ public class IssueController extends GenericController<Issue,Integer> {
         return lista;
     }
 
+    @RequestMapping(value="/byState/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    List<IssueType> getIssueTypeByState(@PathVariable Integer id) {
+        List<IssueType> lista=repository.countIssueState(id);
+        return lista;
+    }
+
+    @RequestMapping(value="/byPriority/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    List<IssueType> getIssuePriorityByProject(@PathVariable Integer id) {
+        List<IssueType> lista=repository.countIssuePriority(id);
+        return lista;
+    }
+
     @RequestMapping(value="/insert",method = RequestMethod.POST)
     @Transactional
     public @ResponseBody
