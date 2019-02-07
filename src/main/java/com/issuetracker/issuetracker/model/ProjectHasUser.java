@@ -20,6 +20,14 @@ public class ProjectHasUser {
         this.projectId = projectId;
     }
 
+    @Override
+    public String toString() {
+        return "ProjectHasUser{" +
+                "projectId=" + projectId +
+                ", userId=" + userId +
+                '}';
+    }
+
     @Id
     @Column(name = "user_id")
     public int getUserId() {

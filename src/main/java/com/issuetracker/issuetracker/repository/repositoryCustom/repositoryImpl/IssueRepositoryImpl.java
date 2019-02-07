@@ -43,6 +43,12 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom{
     }
 
     @Override
+    public IssueCustom getById(Integer id) {
+        List<IssueCustom> list = entityManager.createNativeQuery(QUERY,"IssueMapping").getResultList();
+        return list.stream().filter(e->e.getId()==id).findFirst().orElse(null);
+    }
+
+    @Override
     public List<IssueType> countIssueType(Integer projectId) {
         return entityManager.createNativeQuery(COUNT_ISSUES_BY_TYPE,"IssueType").setParameter(1,projectId).getResultList();
     }

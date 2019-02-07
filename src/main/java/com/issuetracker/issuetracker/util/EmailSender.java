@@ -33,7 +33,12 @@ public class EmailSender {
     }
 
     public static void sendNotification(String text, String projectName) {
-        String mail=text.split(" ")[2].replace("[","").replace("]","");
+        String mail="";
+        try {
+             mail = text.split(" ")[2].replace("[", "").replace("]", "");
+        }catch(Exception e){
+            mail=text;
+        }
         System.out.println(mail);
         try {
             notify(mail,"You are added as participant in project "+projectName+"");

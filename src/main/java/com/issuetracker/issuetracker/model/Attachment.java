@@ -1,9 +1,6 @@
 package com.issuetracker.issuetracker.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -12,8 +9,10 @@ public class Attachment {
     private int id;
     private byte[] file;
     private int issueId;
+    private String name;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public int getId() {
         return id;
@@ -58,5 +57,15 @@ public class Attachment {
         int result = Objects.hash(id, issueId);
         result = 31 * result + Arrays.hashCode(file);
         return result;
+    }
+
+    @Basic
+    @Column(name = "name")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

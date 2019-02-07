@@ -7,6 +7,7 @@ package com.issuetracker.issuetracker.controller;
         import com.issuetracker.issuetracker.repository.ProjectHasUserRepository;
         import com.issuetracker.issuetracker.repository.ProjectRepository;
         import com.issuetracker.issuetracker.repository.UserRepository;
+        import com.issuetracker.issuetracker.util.EmailExecutorService;
         import com.issuetracker.issuetracker.util.EmailSender;
         import com.issuetracker.issuetracker.util.Validator;
         import org.springframework.beans.factory.annotation.Autowired;
@@ -55,29 +56,45 @@ public class ProjectController extends GenericController<Project,Integer>{
     @Transactional
     public @ResponseBody String insertProject(@RequestBody ProjectCustom project) throws BadRequestException {
         Project newProject=new Project();
-        newProject.setDescription(project.getProject().getDescription());
-        newProject.setFinnished((byte)0);
-        newProject.setName(project.getProject().getName());
-        newProject.setPhotoUrl(project.getProject().getPhotoUrl());
-        Project pro=null;
-        if(( pro=repo.saveAndFlush(newProject))!=null) {
-            for(ParticipantInfo info:project.getList()){
-                ProjectHasUser entity=new ProjectHasUser();
-                entity.setProjectId(pro.getId());
-                entity.setUserId(info.getId());
-                projectHasUserRepo.saveAndFlush(entity);
-                EmailSender.sendNotification(info.getText(),pro.getName());
-            }
-            return "Success";
-        }else throw new BadRequestException(badRequestInsert);
+       return updateProject(newProject,project);
     }
 
+    @RequestMapping(value="/update",method = RequestMethod.PUT)
+    @Transactional
+    public @ResponseBody String updateProject(@RequestBody ProjectCustom project) throws BadRequestException {
+        Project newProject=repository.getById(project.getProject().getId());
+        return updateProject(newProject,project);
+
+    }
     @Override
     public @ResponseBody
     List<Project> getAll() {
         return cloner.deepClone(repository.getAllByFinnishedEquals((byte)0));
     }
 
+    private String updateProject(Project newProject,ProjectCustom project) throws BadRequestException {
+        newProject.setDescription(project.getProject().getDescription());
+        newProject.setFinnished((byte)0);
+        newProject.setName(project.getProject().getName());
+        newProject.setPhotoUrl(project.getProject().getPhotoUrl());
+        Project pro=null;
+        if(( pro=repo.saveAndFlush(newProject))!=null) {
+            for(ParticipantInfo info:project.getList()) {
+                ProjectHasUser entity = new ProjectHasUser();
+                entity.setProjectId(pro.getId());
+                entity.setUserId(info.getId());
+                projectHasUserRepo.saveAndFlush(entity);
+                String projectName=pro.getName();
+                EmailExecutorService.getEmailExecuto().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        EmailSender.sendNotification(info.getText(), projectName);
+                    }
+                });
+            }
+            return "Success";
+        }else throw new BadRequestException(badRequestUpdate);
+    }
 
     @Override
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)

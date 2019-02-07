@@ -5,4 +5,5 @@ import com.issuetracker.issuetracker.repository.repositoryCustom.IssueRepository
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IssueRepository extends JpaRepository<Issue, Integer> , IssueRepositoryCustom {
+
 }

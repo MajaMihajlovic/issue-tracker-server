@@ -12,4 +12,6 @@ public interface UserRepositoryCustom {
         List<UserCustom> getAllFiltered();
 
         List<UserCustom> getParticipants(Integer id);
+
+        List<UserCustom> getNonParticipants(Integer id);
 }

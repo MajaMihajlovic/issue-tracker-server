@@ -7,10 +7,7 @@ import com.issuetracker.issuetracker.model.LoginInfo;
 import com.issuetracker.issuetracker.model.User;
 import com.issuetracker.issuetracker.model.modelCustom.UserCustom;
 import com.issuetracker.issuetracker.repository.UserRepository;
-import com.issuetracker.issuetracker.util.EmailSender;
-import com.issuetracker.issuetracker.util.PasswordInformation;
-import com.issuetracker.issuetracker.util.Util;
-import com.issuetracker.issuetracker.util.Validator;
+import com.issuetracker.issuetracker.util.*;
 import org.apache.catalina.connector.CoyoteInputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,6 +123,12 @@ public class UserController extends GenericController<User,Integer> {
         return users;
     }
 
+    @RequestMapping(value = "/getNonParticipants/{id}", method = RequestMethod.GET)
+    public @ResponseBody
+    List<UserCustom> getNonParticipants(@PathVariable Integer id) {
+        List<UserCustom> users = repository.getNonParticipants(id);
+        return users;
+    }
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -133,6 +136,7 @@ public class UserController extends GenericController<User,Integer> {
         User user = repository.login(userInformation.getUsername(), userInformation.getPassword());
         if (user != null) {
             user.setPassword(null);
+            System.out.println(user.getPhoto());
             return user;
         }
         throw new ForbiddenException("Forbidden");
@@ -151,21 +155,17 @@ public class UserController extends GenericController<User,Integer> {
     }
 
     @RequestMapping(value="/insert", method = RequestMethod.POST)
-    public @ResponseBody String insert(String email, InputStream file, String password, String username, String fullname) throws BadRequestException, IOException {
+    public @ResponseBody String insert(String email, byte[] file, String password, String username, String fullname) throws BadRequestException, IOException {
         User user=new User();
         user.setUsername(username);
         user.setFullName(fullname);
         user.setPassword(Util.hashPassword(password));
         user.setEmail(email);
-
-        user.setPhoto(file.readAllBytes());
-
+        user.setPhoto(file);
         user.setActive((byte)1);
-        System.out.println("Insert"+user);
         if(repository.countAllByEmail(user.getEmail()).compareTo(0) == 0){
             if(Validator.validateEmail(user.getEmail())){
                 String randomToken = Util.randomString(16);
-
                 if(repo.saveAndFlush(user) != null){
                     //EmailSender.sendRegistrationLink(user.getEmail().trim(), randomToken);
                     return "Success";
@@ -233,8 +233,16 @@ public class UserController extends GenericController<User,Integer> {
                 String newPassword = Util.randomString(16);
             user.setPassword(Util.hashPassword(newPassword));
                 if(repo.saveAndFlush(user) != null){
-                    EmailSender.sendNewPassword(user.getEmail().trim(), newPassword);
-
+                    EmailExecutorService.getEmailExecuto().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                EmailSender.sendNewPassword(user.getEmail().trim(), newPassword);
+                            } catch (BadRequestException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                     return "Success";
                 }
                 throw new BadRequestException(badRequestResetPassword);

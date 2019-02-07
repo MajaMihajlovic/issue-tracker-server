@@ -39,6 +39,14 @@ public class ProjectHasUserPK implements Serializable {
     }
 
     @Override
+    public String toString() {
+        return "ProjectHasUserPK{" +
+                "projectId=" + projectId +
+                ", userId=" + userId +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(projectId, userId);
     }
