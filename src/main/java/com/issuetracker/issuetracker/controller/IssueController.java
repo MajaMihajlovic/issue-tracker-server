@@ -52,12 +52,20 @@ public class IssueController extends GenericController<Issue,Integer> {
     public @ResponseBody
     IssueAttachment getById(@PathVariable Integer id) {
         IssueAttachment issueAttachment=new IssueAttachment();
-        IssueCustom issueCustom=repository.getById(id);
+        IssueCustom issueCustom=repository.getCustomById(id);
         issueAttachment.setIssueCustom(issueCustom);
         List<Attachment> list=attachmentRepository.getByIssueId(id);
         issueAttachment.setList(list);
         return issueAttachment;
     }
+
+    @RequestMapping(value="/getIssueById/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    Issue getIssueById(@PathVariable Integer id) {
+        return repository.getById(id);
+    }
+
 
     @RequestMapping(value="/getAll/",method = RequestMethod.GET)
     @Transactional
@@ -114,11 +122,28 @@ public class IssueController extends GenericController<Issue,Integer> {
         return lista;
     }
 
-
-
     @RequestMapping(value="/insert",method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody String insertIssue(@RequestBody IssueAttachment issueAttachment) throws BadRequestException {
+    public @ResponseBody String insertIssue(@RequestBody Issue issue) throws BadRequestException {
+        if (repo.saveAndFlush(issue) != null) {
+            EmailExecutorService.getEmailExecuto().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        EmailSender.notify(userRepository.getUserById(issue.getAssigneeId()).getEmail(), "You have new task.\n" + issue.getTitle() + "\n" + issue.getDescription());
+
+                    } catch (BadRequestException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        return "Success";
+        } else throw new BadRequestException(badRequestInsert);
+    }
+
+    @RequestMapping(value="/insertWithAttachment",method = RequestMethod.POST)
+    @Transactional
+    public @ResponseBody String insertIssueWithAttachment(@RequestBody IssueAttachment issueAttachment) throws BadRequestException {
         Issue issue=issueAttachment.getIssue();
         Issue addedIssue;
         if(( addedIssue=repo.saveAndFlush(issue))!=null) {
@@ -144,6 +169,7 @@ public class IssueController extends GenericController<Issue,Integer> {
         }else throw new BadRequestException(badRequestInsert);
 
     }
+
     }
 
 

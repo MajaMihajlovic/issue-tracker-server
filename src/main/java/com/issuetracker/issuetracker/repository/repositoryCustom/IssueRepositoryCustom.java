@@ -9,7 +9,7 @@ import java.util.List;
 public interface IssueRepositoryCustom {
 
     List<IssueCustom> getAllIssues();
-    IssueCustom getById(Integer id);
+    IssueCustom getCustomById(Integer id);
     List<IssueType> countIssueType(Integer projectId);
     List<IssueType> countIssuePriority(Integer projectId);
     List<IssueType> countIssueState(Integer projectId);

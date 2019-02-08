@@ -153,6 +153,24 @@ public class Issue {
         return Objects.hash(id, title, description, stateId, priorityId, duedate, createdDate, typeId, reporterId, assigneeId, versionId);
     }
 
+    @Override
+    public String toString() {
+        return "Issue{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", stateId=" + stateId +
+                ", priorityId=" + priorityId +
+                ", duedate=" + duedate +
+                ", createdDate=" + createdDate +
+                ", typeId=" + typeId +
+                ", reporterId=" + reporterId +
+                ", assigneeId=" + assigneeId +
+                ", versionId=" + versionId +
+                ", projectId=" + projectId +
+                '}';
+    }
+
     @Basic
     @Column(name = "project_id")
     public int getProjectId() {
