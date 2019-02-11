@@ -33,7 +33,8 @@ public class IssueController extends GenericController<Issue,Integer> {
 
     @PersistenceContext
     private EntityManager entityManager;
-
+    @Value("${badRequest.update}")
+    private String badRequestUpdate;
     UserRepository userRepository;
     IssueRepository repository;
     AttachmentRepository attachmentRepository;
@@ -126,27 +127,63 @@ public class IssueController extends GenericController<Issue,Integer> {
     @Transactional
     public @ResponseBody String insertIssue(@RequestBody Issue issue) throws BadRequestException {
         if (repo.saveAndFlush(issue) != null) {
-            EmailExecutorService.getEmailExecuto().execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        EmailSender.notify(userRepository.getUserById(issue.getAssigneeId()).getEmail(), "You have new task.\n" + issue.getTitle() + "\n" + issue.getDescription());
-
-                    } catch (BadRequestException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+           sendEmail(issue);
         return "Success";
         } else throw new BadRequestException(badRequestInsert);
     }
 
+    @RequestMapping(value="/insert",method = RequestMethod.PUT)
+    @Transactional
+    public @ResponseBody String updateIssue(@RequestBody Issue issue) throws BadRequestException {
+            if(repository.saveAndFlush(issue)!=null){
+                return "Success";
+            }else   throw new BadRequestException(badRequestUpdate);
+    }
+
+    @RequestMapping(value="/delete/{id}",method = RequestMethod.DELETE)
+    @Transactional
+    public @ResponseBody String deleteIssue(@PathVariable Integer id) throws BadRequestException {
+        Issue issue=repository.getById(id);
+        List<Attachment> attachments=attachmentRepository.getByIssueId(id);
+        if(attachments.size()>0){
+            for(Attachment a:attachments)
+                attachmentRepository.delete(a);
+        }
+        repository.delete(issue);
+        return "Success";
+    }
+
+
     @RequestMapping(value="/insertWithAttachment",method = RequestMethod.POST)
     @Transactional
     public @ResponseBody String insertIssueWithAttachment(@RequestBody IssueAttachment issueAttachment) throws BadRequestException {
-        Issue issue=issueAttachment.getIssue();
+        Issue issue = issueAttachment.getIssue();
         Issue addedIssue;
-        if(( addedIssue=repo.saveAndFlush(issue))!=null) {
+        if ((addedIssue = repo.saveAndFlush(issue)) != null) {
+            updateAttachments(issueAttachment,addedIssue);
+            sendEmail(issue);
+            return "Success";
+        } else throw new BadRequestException(badRequestInsert);
+    }
+        @RequestMapping(value="/insertWithAttachment",method = RequestMethod.PUT)
+        @Transactional
+        public @ResponseBody String updateIssueWithAttachment(@RequestBody IssueAttachment issueAttachment) throws BadRequestException {
+
+        List<Attachment> oldAttachments= attachmentRepository.getByIssueId(issueAttachment.getIssue().getId());
+        for(Attachment a:oldAttachments){
+            attachmentRepository.delete(a);
+        }
+            Issue issue=issueAttachment.getIssue();
+            Issue addedIssue;
+            if(( addedIssue=repo.saveAndFlush(issue))!=null) {
+               updateAttachments(issueAttachment,addedIssue);
+
+                return "Success";
+            }else throw new BadRequestException(badRequestInsert);
+
+        }
+
+        private void updateAttachments(IssueAttachment issueAttachment, Issue addedIssue) {
             for (Attachment file : issueAttachment.getList()) {
                 Attachment att = new Attachment();
                 att.setFile(file.getFile());
@@ -154,23 +191,23 @@ public class IssueController extends GenericController<Issue,Integer> {
                 att.setIssueId(addedIssue.getId());
                 attachmentRepository.saveAndFlush(att);
             }
-            EmailExecutorService.getEmailExecuto().execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        EmailSender.notify(userRepository.getUserById(issue.getAssigneeId()).getEmail(), "You have new task.\n"+issue.getTitle()+"\n"+issue.getDescription());
+        }
 
-                    } catch (BadRequestException e) {
-                        e.printStackTrace();
+            private void sendEmail(Issue issue){
+                EmailExecutorService.getEmailExecuto().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            EmailSender.notify(userRepository.getUserById(issue.getAssigneeId()).getEmail(), "You have new task.\n" + issue.getTitle() + "\n" + issue.getDescription());
+
+                        } catch (BadRequestException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-            });
-            return "Success";
-        }else throw new BadRequestException(badRequestInsert);
+                });
+            }
+        }
 
-    }
-
-    }
 
 
 
