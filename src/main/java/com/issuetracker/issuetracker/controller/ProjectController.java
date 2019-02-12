@@ -69,7 +69,7 @@ public class ProjectController extends GenericController<Project,Integer>{
     @Override
     public @ResponseBody
     List<Project> getAll() {
-        return cloner.deepClone(repository.getAllByFinnishedEquals((byte)0));
+        return repository.getAllByFinnishedEquals((byte)0);
     }
 
     private String updateProject(Project newProject,ProjectCustom project) throws BadRequestException {

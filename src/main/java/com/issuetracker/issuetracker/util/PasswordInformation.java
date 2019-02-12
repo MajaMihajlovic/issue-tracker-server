@@ -23,16 +23,6 @@ public class PasswordInformation {
         this.repeatedNewPassword = repeatedNewPassword;
     }
 
-    @Override
-    public String toString() {
-        return "PasswordInformation{" +
-                "id=" + id +
-                ", oldPassword='" + oldPassword + '\'' +
-                ", newPassword='" + newPassword + '\'' +
-                ", repeatedNewPassword='" + repeatedNewPassword + '\'' +
-                '}';
-    }
-
     public String getOldPassword() {
         return oldPassword;
     }

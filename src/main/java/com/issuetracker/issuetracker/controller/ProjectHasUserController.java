@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class ProjectHasUserController extends GenericController<ProjectHasUser,Integer>{
 
     private ProjectHasUserRepository repository;
-    //private ProjectHasUserRepositoryPK repositoryPK;
 
     @Value("${badRequest.delete}")
     private String badRequestDelete;

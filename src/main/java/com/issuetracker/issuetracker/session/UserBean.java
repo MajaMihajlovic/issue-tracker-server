@@ -10,12 +10,10 @@ import javax.annotation.PostConstruct;
 @Scope("session")
 public class UserBean {
     private User user;
-    private Boolean loggedIn;
 
     @PostConstruct
     void init() {
         user = new User();
-        loggedIn = false;
     }
 
     public User getUser() {
@@ -26,11 +24,4 @@ public class UserBean {
         this.user = user;
     }
 
-    public Boolean getLoggedIn() {
-        return loggedIn;
-    }
-
-    public void setLoggedIn(Boolean loggedIn) {
-        this.loggedIn = loggedIn;
-    }
 }

@@ -53,36 +53,17 @@ public class UserController extends GenericController<User,Integer> {
     @Value("${badRequest.delete}")
     private String badRequestDelete;
 
-    @Value("${badRequest.stringMaxLength}")
-    private String badRequestStringMaxLength;
-
-    @Value("${badRequest.binaryLength}")
-    private String badRequestBinaryLength;
-
     @Value("${badRequest.registration}")
     private String badRequestRegistration;
 
     @Value("${badRequest.usernameExists}")
     private String badRequestUsernameExists;
 
-    @Value("${badRequest.passwordStrength}")
-    private String badRequestPasswordStrength;
-
-
     @Value("${badRequest.validateEmail}")
     private String badRequestValidateEmail;
 
     @Value("${badRequest.oldPassword}")
     private String badRequestOldPassword;
-
-    @Value("${badRequest.repeatedNewPassword}")
-    private String badRequestRepeatedNewPassword;
-
-    @Value("${badRequest.resetPassword}")
-    private String badRequestResetPassword;
-
-    @Value("${badRequest.deactivateUser}")
-    private String badRequestDeactivateUser;
 
     @Value("${badRequest.emailExists}")
     private String badRequestEmailExists;
@@ -100,12 +81,13 @@ public class UserController extends GenericController<User,Integer> {
     @Override
     public @ResponseBody
     List<User> getAll() {
-        List<User> users = cloner.deepClone(repository.getAllByActive( (byte)1));
-        for(User user : users){
+        List<User> users = repository.getAllByActive( (byte)1);
+        List<User> copy=users;
+        for(User user : copy){
             user.setPassword(null);
         }
 
-        return users;
+        return copy;
     }
 
     @RequestMapping(value = "/getUsers", method = RequestMethod.GET)
@@ -187,7 +169,6 @@ public class UserController extends GenericController<User,Integer> {
              //   if (Validator.passwordChecking(newUser.getPassword())) {
             if(repository.countAllByEmail(newUser.getEmail()).compareTo(0) == 0){
                 if(Validator.validateEmail(newUser.getEmail())){
-                    if (Validator.stringMaxLength(newUser.getFullName(), 100)) {
                        // User user = entityManager.find(User.class, newUser.getId());
                         User user=new User();
                         user.setUsername(newUser.getUsername());
@@ -201,8 +182,6 @@ public class UserController extends GenericController<User,Integer> {
                         }
                         throw new BadRequestException(badRequestRegistration);
                     }
-                    throw new BadRequestException(badRequestStringMaxLength.replace("{tekst}", "imena").replace("{broj}", String.valueOf(100)));
-                }
                 throw new BadRequestException(badRequestValidateEmail);
             }
             throw new BadRequestException(badRequestEmailExists);
@@ -211,44 +190,8 @@ public class UserController extends GenericController<User,Integer> {
             }throw  new BadRequestException(badRequestUsernameExists);
 
     }
-    @RequestMapping(value = "/deactivate/{id}", method = RequestMethod.GET)
-    public @ResponseBody
-    String deactivate(@PathVariable Integer id) throws BadRequestException {
-        User user = repository.findById(id).orElse(null);
-        if(user != null){
-            user.setActive((byte)0);
-            if(repo.saveAndFlush(user) != null){
-                return "Success";
-            }
-            throw new BadRequestException(badRequestDeactivateUser);
-        }
-        throw new BadRequestException(badRequestNoUser);
-    }
-    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
-    public @ResponseBody
-    String resetPassword(@RequestBody LoginInfo userInformation) throws BadRequestException {
-        User userTemp = repository.getByUsername(userInformation.getUsername());
-        if (userTemp != null) {
-                User user = repository.findById(userTemp.getId()).orElse(null);
-                String newPassword = Util.randomString(16);
-            user.setPassword(Util.hashPassword(newPassword));
-                if(repo.saveAndFlush(user) != null){
-                    EmailExecutorService.getEmailExecuto().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                EmailSender.sendNewPassword(user.getEmail().trim(), newPassword);
-                            } catch (BadRequestException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    return "Success";
-                }
-                throw new BadRequestException(badRequestResetPassword);
-            }
-            throw new BadRequestException(badRequestNoUser);
-    }
+
+
     @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
     public @ResponseBody
     String updatePassword(@RequestBody PasswordInformation passwordInformation) throws BadRequestException{
@@ -256,15 +199,12 @@ public class UserController extends GenericController<User,Integer> {
         System.out.println(passwordInformation);
         if(user != null){
             if(passwordInformation.getOldPassword() != null && user.getPassword().trim().equals(Util.hashPassword(passwordInformation.getOldPassword().trim()))) {
-                if (passwordInformation.getRepeatedNewPassword() != null && passwordInformation.getNewPassword().trim().equals(passwordInformation.getRepeatedNewPassword().trim())) {
                     user.setPassword(Util.hashPassword(passwordInformation.getNewPassword()));
                     if (repo.saveAndFlush(user) != null) {
                         return "Success";
                     }
                     throw new BadRequestException(badRequestUpdate);
                 }
-                throw new BadRequestException(badRequestRepeatedNewPassword);
-            }
             throw new BadRequestException(badRequestOldPassword);
         }
         throw new BadRequestException(badRequestNoUser);
@@ -301,17 +241,11 @@ public class UserController extends GenericController<User,Integer> {
     @Transactional
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public @ResponseBody
-    String update(@PathVariable Integer id, @RequestBody User user) throws BadRequestException {
-            if (Validator.stringMaxLength(user.getFullName(), 100)) {
+    String update(@PathVariable Integer id, @RequestBody User user) {
                         User userTemp = repository.findById(id).orElse(null);
                         userTemp.setFullName(user.getFullName());
                         userTemp.setEmail(user.getEmail());
                         userTemp.setUsername(user.getUsername());
                 repo.saveAndFlush(userTemp);
-        return "Success";
-                    }
-                    throw new BadRequestException(badRequestBinaryLength.replace("{tekst}", "slike"));
-
-
-    }
+        return "Success"; }
 }

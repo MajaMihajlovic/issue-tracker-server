@@ -24,6 +24,7 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom{
     private static final String COUNT_ISSUES_BY_PRIORITY="select name as type,count(name) as count from issue i inner join priority t on t.id=i.priority_id  where project_id=?  group by name;";
     private static final String COUNT_ISSUES_BY_STATE="select name as type,count(name) as count from issue i inner join state t on t.id=i.state_id  where project_id=?  group by name;";
 
+    private static final String COUNT_ISSUES_PER_ASSIGNEE="select full_name as type,count(full_name) as count from issue i inner join user u on u.id=i.assignee_id  where project_id=?  group by full_name;";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -59,6 +60,11 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom{
     @Override
     public List<IssueType> countIssueState(Integer projectId) {
        return  entityManager.createNativeQuery(COUNT_ISSUES_BY_STATE,"IssueType").setParameter(1,projectId).getResultList();
+    }
+
+    @Override
+    public List<IssueType> countIssuePerAssignee(Integer projectId) {
+        return  entityManager.createNativeQuery(COUNT_ISSUES_PER_ASSIGNEE,"IssueType").setParameter(1,projectId).getResultList();
     }
     }
 

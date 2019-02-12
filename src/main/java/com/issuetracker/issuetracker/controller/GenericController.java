@@ -15,7 +15,7 @@ import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.util.List;
 
-public class GenericController<T, ID extends Serializable> extends GenericLogger<T> {
+public class GenericController<T, ID extends Serializable>  {
 
     protected JpaRepository<T, ID> repo;
     @PersistenceContext
@@ -67,7 +67,7 @@ public class GenericController<T, ID extends Serializable> extends GenericLogger
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public @ResponseBody
     String update(@PathVariable ID id, @RequestBody T object) throws BadRequestException,ForbiddenException {
-        T oldObject = cloner.deepClone(repo.findById(id).orElse(null));
+        T oldObject = repo.findById(id).orElse(null);
         if (repo.saveAndFlush(object) != null) {
             //logUpdateAction(object, oldObject);
             return "Success";

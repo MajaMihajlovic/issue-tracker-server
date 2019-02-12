@@ -11,7 +11,6 @@ import com.issuetracker.issuetracker.repository.IssueRepository;
 import com.issuetracker.issuetracker.repository.UserRepository;
 import com.issuetracker.issuetracker.util.EmailExecutorService;
 import com.issuetracker.issuetracker.util.EmailSender;
-import microsoft.exchange.webservices.data.notification.StreamingSubscriptionConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +31,10 @@ public class IssueController extends GenericController<Issue,Integer> {
 
     @PersistenceContext
     private EntityManager entityManager;
+
     @Value("${badRequest.update}")
     private String badRequestUpdate;
+
     UserRepository userRepository;
     IssueRepository repository;
     AttachmentRepository attachmentRepository;
@@ -104,6 +104,14 @@ public class IssueController extends GenericController<Issue,Integer> {
     public @ResponseBody
     List<IssueType> getIssueTypeByProject(@PathVariable Integer id) {
         List<IssueType> lista=repository.countIssueType(id);
+        return lista;
+    }
+
+    @RequestMapping(value="/issuePerAssignee/{id}",method = RequestMethod.GET)
+    @Transactional
+    public @ResponseBody
+    List<IssueType> getIssuesPerAssignee(@PathVariable Integer id) {
+        List<IssueType> lista=repository.countIssuePerAssignee(id);
         return lista;
     }
 
@@ -177,7 +185,6 @@ public class IssueController extends GenericController<Issue,Integer> {
             Issue addedIssue;
             if(( addedIssue=repo.saveAndFlush(issue))!=null) {
                updateAttachments(issueAttachment,addedIssue);
-
                 return "Success";
             }else throw new BadRequestException(badRequestInsert);
 

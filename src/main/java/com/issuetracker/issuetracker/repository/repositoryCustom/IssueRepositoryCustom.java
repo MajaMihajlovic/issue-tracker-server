@@ -9,8 +9,14 @@ import java.util.List;
 public interface IssueRepositoryCustom {
 
     List<IssueCustom> getAllIssues();
+
     IssueCustom getCustomById(Integer id);
+
     List<IssueType> countIssueType(Integer projectId);
+
     List<IssueType> countIssuePriority(Integer projectId);
+
     List<IssueType> countIssueState(Integer projectId);
+
+    List<IssueType> countIssuePerAssignee(Integer projectId);
 }

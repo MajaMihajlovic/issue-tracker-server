@@ -9,8 +9,12 @@ import java.util.List;
 public interface UserRepository  extends JpaRepository<User, Integer>, UserRepositoryCustom {
 
     User getByUsername(String username);
+
     User getByToken(String token);
+
     Integer countAllByEmail(String email);
+
     List<User> getAllByActive(byte active);
+
     User getUserById(Integer id);
 }
