@@ -18,7 +18,7 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom{
             " left join state as s on s.id=i.state_id left join project as pr on pr.id=i.project_id left join  priority as p  on p.id=priority_id\n" +
             " left join  type as t on t.id=type_id left join user as r on r.id=reporter_id \n" +
             " left join user as a on a.id=assignee_id\n" +
-            " left join version as v on v.id=version_id;";
+            " left join version as v on v.id=version_id order by duedate desc;";
 
     private static final String COUNT_ISSUES_BY_TYPE="select name as type,count(name) as count from issue i inner join type t on t.id=i.type_id  where project_id=?  group by name;";
     private static final String COUNT_ISSUES_BY_PRIORITY="select name as type,count(name) as count from issue i inner join priority t on t.id=i.priority_id  where project_id=?  group by name;";
